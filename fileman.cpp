@@ -3,6 +3,7 @@
 #include<filesystem>
 #include<sstream>
 #include<vector>
+#include<algorithm>
 
 //namespacing this for easier shit
 namespace fs=std::filesystem;
@@ -24,15 +25,23 @@ int main()
 
         else if(command=="ls")           //listing files and directories
         {
-            std::vector<fs::directory_entry> dir,file;
+            std::vector<fs::directory_entry> dir,file,entries;
 
             for( const auto& entry: fs::directory_iterator(CurrentPath))
-            {
-
-                /**** to differentiate between directories and files ****/
+            {                /**** to differentiate between directories and files ****/
                 if(entry.is_directory()) dir.push_back(entry);  //just directories 
                 else file.push_back(entry);                
             }
+
+            std::sort(dir.begin(),dir.end(),[](const auto& a, const auto& b)
+            {
+                return a.path().filename().string() < b.path().filename().string();
+            });
+
+            std::sort(file.begin(),file.end(),[](const auto& a, const auto& b)
+            {
+                return a.path().filename().string() < b.path().filename().string();
+            });
 
             for(const auto& d : dir)
             {
@@ -72,6 +81,10 @@ int main()
             }
 
         }
+
+        
+
+
         else std::cout<<"invalid Input! \n";        //exceptions
 
 
