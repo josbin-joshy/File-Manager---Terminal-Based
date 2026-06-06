@@ -154,7 +154,6 @@ to split user input into:
 - File permissions display
 - Hidden file support
 - Colored terminal output
-- Create directories (`mkdir`)
 - Delete files and directories
 - Copy and move operations
 - Interactive navigation using arrow keys
