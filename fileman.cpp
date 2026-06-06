@@ -82,7 +82,24 @@ int main()
 
         }
 
-        
+        else if(command=="mkdir")
+        {
+            if(argument.empty()) std::cout<<"mkdir Command requires argument!\n";
+
+            else
+            {
+                fs::path newpath{CurrentPath / argument};
+                if(fs::exists(newpath))
+                {
+                    std::cout<<"Directory already exists!\n";
+                }
+                else
+                {
+                    if(fs::create_directory(newpath)) std::cout<<"Directory Created!\n";
+                    else std::cout<<"Directory Failed to Create!"<<std::endl;
+                }
+            }
+        }
 
 
         else std::cout<<"invalid Input! \n";        //exceptions
