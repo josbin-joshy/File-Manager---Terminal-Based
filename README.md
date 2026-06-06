@@ -150,8 +150,6 @@ to split user input into:
 ---
 
 ## Future Improvements
-
-- Alphabetical sorting
 - File size display
 - File permissions display
 - Hidden file support
