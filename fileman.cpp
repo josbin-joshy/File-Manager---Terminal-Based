@@ -2,6 +2,7 @@
 #include<string.h>
 #include<filesystem>
 #include<sstream>
+#include<vector>
 
 //namespacing this for easier shit
 namespace fs=std::filesystem;
@@ -13,7 +14,7 @@ int main()
 
     while(true)
     {
-        std::cout<<"Enter prompt:  ";
+        std::cout<<"Enter command:  ";
         std::string command,argument,input;
         std::getline(std::cin,input);      //got the prompt baby
         std::stringstream ss(input);
@@ -22,17 +23,27 @@ int main()
         if(command=="q") break;          //quiting
 
         else if(command=="ls")           //listing files and directories
+        {
+            std::vector<fs::directory_entry> dir,file;
+
             for( const auto& entry: fs::directory_iterator(CurrentPath))
             {
 
                 /**** to differentiate between directories and files ****/
-                if(entry.is_directory()) std::cout<<"[DIR]";         //just directories
-                else if(entry.is_regular_file()) std::cout<<"[REG]";//regular file liek .txt, .py,.thattypahit
-                else std::cout<<"[UNK]";                            //unknown
-
-                std::cout<<entry.path().filename().string()<<'\n';
-                
+                if(entry.is_directory()) dir.push_back(entry);  //just directories 
+                else file.push_back(entry);                
             }
+
+            for(const auto& d : dir)
+            {
+                std::cout<<"[DIR]:"<<d.path().filename().string()<<std::endl;
+            }
+            std::cout<<"\n";
+            for(const auto& f : file)
+            {
+                std::cout<<"[FILE]:"<<f.path().filename().string()<<std::endl;
+            }
+        }
 
         else if(command=="pwd")      //listing the current directory
         {
