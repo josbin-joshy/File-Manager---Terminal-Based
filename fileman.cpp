@@ -1,5 +1,5 @@
 #include<iostream>
-#include<string.h>
+#include<string>
 #include<filesystem>
 #include<sstream>
 #include<vector>
@@ -14,7 +14,7 @@ int main()
 
     while(true)
     {
-        std::cout<<"Enter command:  ";
+        std::cout<<CurrentPath.string()<<"$:";
         std::string command,argument,input;
         std::getline(std::cin,input);      //got the prompt baby
         std::stringstream ss(input);
