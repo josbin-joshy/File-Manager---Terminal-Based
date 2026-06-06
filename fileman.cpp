@@ -4,6 +4,7 @@
 #include<sstream>
 #include<vector>
 #include<algorithm>
+#include<fstream>
 
 //namespacing this for easier shit
 namespace fs=std::filesystem;
@@ -97,6 +98,38 @@ int main()
                 {
                     if(fs::create_directory(newpath)) std::cout<<"Directory Created!\n";
                     else std::cout<<"Directory Failed to Create!"<<std::endl;
+                }
+            }
+        }
+
+        else if(command == "touch")
+        {
+            if(argument.empty()) std::cout<<"touch Command missing argument!\n";
+            else 
+            {
+                fs::path newpath{ CurrentPath / argument};
+                if(fs::exists(newpath)) std::cout<<"File already exists!\n";
+                else
+                {
+                    std::ofstream file(newpath.string());
+                    if(file) std::cout<<"File Created!\n";
+                    else std::cout<<"File Failed to create!\n";
+                }
+            }
+        }
+
+        else if(command == "rm")
+        {
+            if(argument.empty()) std::cout<<"rm Command is missing argument!\n";
+            else
+            {
+                fs::path newpath{ CurrentPath / argument};
+                if(!fs::exists(newpath)) std::cout<<"File Not Found!\n";
+                else if(fs::is_directory(newpath)) std::cout<<"Cannot remove directory. Try rmdir [dir-name]!\n";
+                else 
+                {
+                    if(fs::remove(newpath)) std::cout<<"File removed!"<<std::endl;
+                    else std::cout<<"Ffailed to Remove File!"<<std::endl;
                 }
             }
         }
