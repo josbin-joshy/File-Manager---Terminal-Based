@@ -153,7 +153,6 @@ to split user input into:
 - File size display
 - File permissions display
 - Hidden file support
-- Colored terminal output
 - Delete directories
 - Copy and move operations
 - Interactive navigation using arrow keys
