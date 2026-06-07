@@ -154,7 +154,7 @@ to split user input into:
 - File permissions display
 - Hidden file support
 - Colored terminal output
-- Delete files and directories
+- Delete directories
 - Copy and move operations
 - Interactive navigation using arrow keys
 - Full-screen terminal interface using ncurses
