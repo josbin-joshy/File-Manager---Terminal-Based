@@ -1,6 +1,6 @@
 # Terminal File Manager
 
-A simple terminal-based file manager written in C++ using the C++17.
+A simple terminal-based file manager written in C++.
 
 This project is being built from scratch as a way to learn:
 
