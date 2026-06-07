@@ -5,9 +5,10 @@
 #include<vector>
 #include<algorithm>
 #include<fstream>
-
+#include"styles.h"
 //namespacing this for easier shit
-namespace fs=std::filesystem;
+namespace fs = std::filesystem;
+namespace tc = color;
 
 int main()
 {
@@ -46,25 +47,25 @@ int main()
 
             for(const auto& d : dir)
             {
-                std::cout<<"[DIR]:"<<d.path().filename().string()<<std::endl;
+                std::cout<<tc::BRIGHT_YELLOW<<"[DIR]:"<<d.path().filename().string()<<tc::RESET<<std::endl;
             }
             std::cout<<"\n";
             for(const auto& f : file)
             {
-                std::cout<<"[FILE]:"<<f.path().filename().string()<<std::endl;
+                std::cout<<tc::BRIGHT_MAGENTA<<"[FILE]:"<<f.path().filename().string()<<tc::RESET<<std::endl;
             }
         }
 
         else if(command=="pwd")      //listing the current directory
         {
-            std::cout<<"Current Directory: ";
-            std::cout<<CurrentPath.string();
+            std::cout<<tc::BRIGHT_BLUE<<"Current Directory: ";
+            std::cout<<CurrentPath.string()<<tc::RESET;
             std::cout<<std::endl;
         }
 
         else if(command=="cd")
         {
-            if(argument.empty())  std::cout<<"cd missing argument!\n";
+            if(argument.empty())  std::cout<<tc::BRIGHT_RED<<"cd missing argument!\n"<<tc::RESET;
 
             else
             {
@@ -77,7 +78,7 @@ int main()
                     if(fs::exists(newpath) && fs::is_directory(newpath))  CurrentPath = fs::canonical(newpath);
                     
                     //if the newpath doesn't exist or isnt a directory
-                    else std::cout<<"Invalid Argument!\n ***Either argument is not directory or the directory does not exist***\n";
+                    else std::cout<<tc::BRIGHT_RED<<"Invalid Argument!\n ***Either argument is not directory or the directory does not exist***\n"<<tc::RESET;
                 }
             }
 
@@ -85,74 +86,74 @@ int main()
 
         else if(command=="mkdir")
         {
-            if(argument.empty()) std::cout<<"mkdir Command requires argument!\n";
+            if(argument.empty()) std::cout<<tc::BRIGHT_RED<<"mkdir Command requires argument!\n"<<tc::RESET;
 
             else
             {
                 fs::path newpath{CurrentPath / argument};
                 if(fs::exists(newpath))
                 {
-                    std::cout<<"Directory already exists!\n";
+                    std::cout<<tc::BRIGHT_RED<<"Directory already exists!\n"<<tc::RESET;
                 }
                 else
                 {
-                    if(fs::create_directory(newpath)) std::cout<<"Directory Created!\n";
-                    else std::cout<<"Directory Failed to Create!"<<std::endl;
+                    if(fs::create_directory(newpath)) std::cout<<tc::BRIGHT_GREEN<<"Directory Created!\n"<<tc::RESET;
+                    else std::cout<<tc::BRIGHT_RED<<"Directory Failed to Create!"<<tc::RESET<<std::endl;
                 }
             }
         }
 
         else if(command == "touch")
         {
-            if(argument.empty()) std::cout<<"touch Command missing argument!\n";
+            if(argument.empty()) std::cout<<tc::BRIGHT_RED<<"touch Command missing argument!\n"<<tc::RESET;
             else 
             {
                 fs::path newpath{ CurrentPath / argument};
-                if(fs::exists(newpath)) std::cout<<"File already exists!\n";
+                if(fs::exists(newpath)) std::cout<<tc::BRIGHT_RED<<"File already exists!\n"<<tc::RESET;
                 else
                 {
                     std::ofstream file(newpath.string());
-                    if(file) std::cout<<"File Created!\n";
-                    else std::cout<<"File Failed to create!\n";
+                    if(file) std::cout<<tc::BRIGHT_GREEN<<"File Created!\n"<<tc::RESET;
+                    else std::cout<<tc::BRIGHT_RED<<"File Failed to create!\n"<<tc::RESET;
                 }
             }
         }
 
         else if(command == "rm")
         {
-            if(argument.empty()) std::cout<<"rm Command is missing argument!\n";
+            if(argument.empty()) std::cout<<tc::BRIGHT_RED<<"rm Command is missing argument!\n"<<tc::RESET;
             else
             {
                 fs::path newpath{ CurrentPath / argument};
-                if(!fs::exists(newpath)) std::cout<<"File Not Found!\n";
-                else if(fs::is_directory(newpath)) std::cout<<"Cannot remove directory. Try rmdir [dir-name]!\n";
+                if(!fs::exists(newpath)) std::cout<<tc::BRIGHT_RED<<"File Not Found!\n"<<tc::RESET;
+                else if(fs::is_directory(newpath)) std::cout<<tc::BRIGHT_RED<<"Cannot remove directory. Try rmdir [dir-name]!\n"<<tc::RESET;
                 else 
                 {
-                    if(fs::remove(newpath)) std::cout<<"File removed!"<<std::endl;
-                    else std::cout<<"Ffailed to Remove File!"<<std::endl;
+                    if(fs::remove(newpath)) std::cout<<tc::BRIGHT_GREEN<<"File removed!"<<tc::RESET<<std::endl;
+                    else std::cout<<tc::BRIGHT_RED<<"Ffailed to Remove File!"<<tc::RESET<<std::endl;
                 }
             }
         }
 
         else if(command == "info")
         {
-            if(argument.empty()) std::cout<<"Missing argument for info"<<std::endl;
+            if(argument.empty()) std::cout<<tc::BRIGHT_RED<<"Missing argument for info"<<tc::RESET<<std::endl;
             else
             {
                 fs::path target{ CurrentPath / argument};
-                if(!fs::exists(target)) std::cout<<"Target not Found!"<<std::endl;
+                if(!fs::exists(target)) std::cout<<tc::BRIGHT_RED<<"Target not Found!"<<tc::RESET<<std::endl;
                 else
                 {
-                    std::cout<<"NAME: "<<target.filename().string()<<"\n";
-                    if(fs::is_directory(target)) std::cout<<"DIRECTORY: "<<std::endl;
-                    else std::cout<<"FILE"<<std::endl;
-                    std::cout<<"SIZE: "<<fs::file_size(target)<<"bytes\n";
+                    std::cout<<tc::BRIGHT_CYAN<<"NAME: "<<target.filename().string()<<"\n";
+                    if(fs::is_directory(target)) std::cout<<tc::BRIGHT_YELLOW<<"DIRECTORY: "<<std::endl;
+                    else std::cout<<tc::BRIGHT_MAGENTA<<"FILE"<<std::endl;
+                    std::cout<<tc::BRIGHT_BLUE<<"SIZE: "<<fs::file_size(target)<<"bytes\n"<<tc::RESET;
                 }
             }
         }
 
 
-        else std::cout<<"invalid Input! \n";        //exceptions
+        else std::cout<<tc::BRIGHT_RED<<"invalid Input! \n"<<tc::RESET;        //exceptions
 
 
     }
