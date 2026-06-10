@@ -8,6 +8,7 @@
 #include<ncurses.h>
 // #include"styles.h"
 // #include"all_commands.h"
+
 //namespacing this for easier shit
 namespace fs = std::filesystem;
 //namespace tc = color;
@@ -17,12 +18,14 @@ int main()
 {
     //let this be
     fs::path CurrentPath{fs::current_path()};
-    int selected = 0;
+    int selected{};
+    int offset{};
+    
 
     initscr();
     cbreak();
     noecho();
-    keypad(stdscr,TRUE);
+    keypad(stdscr, TRUE);
 
 
 
@@ -40,47 +43,89 @@ int main()
             if(selected >= entries.size() && !entries.empty()) 
                 selected = entries.size() - 1;
 
-        //RENDER
+        if(!entries.empty())
+        {
+            if(selected >= entries.size())
+                selected = entries.size()-1;
+            if(offset > selected)
+                offset = selected;
+        }
+        else
+        {
+            selected = 0;
+            offset = 0;
+        }
+
+        //RENDER-THINGS(not real render)
 
         clear();
+        /*---------------------------HEADER--------------------------------*/
+        mvprintw(0,0,"[PATH]:%s",CurrentPath.c_str());
 
-        mvprintw(0,0,"[PATH]:%s\n",CurrentPath.c_str());
+        /*-------------------------FILE LIST----------------------------------*/
+        int visible_height{LINES - 2};
 
-        for(size_t i = 0; i<entries.size(); ++i)
+        for(int i = offset; i<(int)entries.size() && i< (offset + visible_height); ++i)
         {
+            int row = i - offset + 1;
+
             if(i == selected)
-                mvprintw(i+2,0,">>");
-            else
-                mvprintw(i+2,0," ");
+                attron(A_REVERSE);
             
             if(entries[i].is_directory())
-                printw("[DIR]:");
+                mvprintw(row,0,"[DIR]:%s",entries[i].path().filename().c_str());
             else
-                printw("[FILE]:");
-            
-            printw("%s\n",entries[i].path().filename().c_str());
+                mvprintw(row,0,"[FILE]:%s",entries[i].path().filename().c_str());
+
+            if(i == selected)
+                attroff(A_REVERSE);
         }
 
 
-        //INPUT
-        char key{getch()};
-        
+        /*----------------------INPUT--------------------*/
+        int key{getch()};
+        //DEBUG
+        mvprintw(0,0,"key = %d ", key);
+
+
+        //--------------------LOGIC SHIT -----------------------------------
         if(key == 'q')
             break;
-        else if(key == 'j')
+        else if(key == 'j' || key == KEY_DOWN)
         {
-            if(selected+1 <= entries.size())
+            if(selected+1 < entries.size())
                 ++selected;
+            if(selected >= offset + visible_height)
+                ++offset;
         }
-        else if(key == 'k')
+        else if(key == 'k' || key == KEY_UP)
         {
             if(selected >0)
-            {
                 --selected;
+            if(selected < offset)
+                --offset;
+        }
+        else if( key == 'l'|| key == '\n')
+        {
+            if(entries[selected].is_directory())
+            {
+                CurrentPath = entries[selected].path();
             }
         }
+        else if(key =='h' || key == KEY_BACKSPACE)
+        {
+            if(CurrentPath.has_parent_path())
+            {
+                CurrentPath = CurrentPath.parent_path();
+                selected = 0;
+                offset = 0;
+            }
+        }
+
+        //FINALE REFRESHING  :)
         refresh();
     }
+    endwin();
     return 0;
 
 }
