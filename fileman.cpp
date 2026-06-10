@@ -9,6 +9,25 @@
 // #include"styles.h"
 // #include"all_commands.h"
 
+
+enum class Mode
+{
+    NORMAL,
+    INPUT,
+    CONFIRM,
+};
+
+
+enum class Action
+{
+    NONE,
+    MKDIR,
+    TOUCH,
+    RENAME,
+    REMOVE,
+};
+
+
 //namespacing this for easier shit
 namespace fs = std::filesystem;
 //namespace tc = color;
@@ -20,6 +39,10 @@ int main()
     fs::path CurrentPath{fs::current_path()};
     int selected{};
     int offset{};
+
+    Mode mode = Mode::NORMAL;
+    Action action = Action::NONE;
+    std::string inputbuffer;
     
 
     initscr();
@@ -89,38 +112,80 @@ int main()
 
 
         //--------------------LOGIC SHIT -----------------------------------
-        if(key == 'q')
-            break;
-        else if(key == 'j' || key == KEY_DOWN)
+        if(mode == Mode::NORMAL)
         {
-            if(selected+1 < entries.size())
-                ++selected;
-            if(selected >= offset + visible_height)
-                ++offset;
-        }
-        else if(key == 'k' || key == KEY_UP)
-        {
-            if(selected >0)
-                --selected;
-            if(selected < offset)
-                --offset;
-        }
-        else if( key == 'l'|| key == '\n')
-        {
-            if(entries[selected].is_directory())
+            if(key == 'q')
+                break;
+            else if(key == 'j' || key == KEY_DOWN)
             {
-                CurrentPath = entries[selected].path();
+                if(selected+1 < entries.size())
+                    ++selected;
+                if(selected >= offset + visible_height)
+                    ++offset;
+            }
+            else if(key == 'k' || key == KEY_UP)
+            {
+                if(selected >0)
+                    --selected;
+                if(selected < offset)
+                    --offset;
+            }
+            else if( key == 'l'|| key == '\n')
+            {
+                if(entries[selected].is_directory())
+                {
+                    CurrentPath = entries[selected].path();
+                }
+            }
+            else if(key =='h' || key == KEY_BACKSPACE)
+            {
+                if(CurrentPath.has_parent_path())
+                {
+                    CurrentPath = CurrentPath.parent_path();
+                    selected = 0;
+                    offset = 0;
+                }
+            }
+
+            if(key == 'm')
+            {
+                mode = Mode::INPUT;
+                action = Action::MKDIR;
+                inputbuffer.clear();
             }
         }
-        else if(key =='h' || key == KEY_BACKSPACE)
+
+        else if(mode == Mode::INPUT)
         {
-            if(CurrentPath.has_parent_path())
+            if(isprint(key))
             {
-                CurrentPath = CurrentPath.parent_path();
-                selected = 0;
-                offset = 0;
+                inputbuffer+=(char)key;
+            }
+            else if(key == KEY_BACKSPACE)
+            {
+                if(!inputbuffer.empty())
+                    inputbuffer.pop_back();
+            }
+            else if(key == '\n' || key == KEY_ENTER)
+            {
+                if(action == Action::MKDIR)
+                {
+                    mkdir(CurrentPath, inputbuffer);
+                }
+                else if(action == Action::TOUCH)
+                {
+                    touch(CurrentPath, inputbuffer);
+                }
+                inputbuffer.clear();
+                mode = Mode::NORMAL;
+                action = Action::NONE;
             }
         }
+
+        if(mode == Mode::INPUT && action == Action::MKDIR)
+            mvprintw(LINES - 1, 0, "New Folder: %s", inputbuffer.c_str());
+        if(mode ==Mode::INPUT && action == Action::TOUCH)
+            mvprintw(LINES - 1, 0, "New File: %s", inputbuffer.c_str());
 
         //FINALE REFRESHING  :)
         refresh();
