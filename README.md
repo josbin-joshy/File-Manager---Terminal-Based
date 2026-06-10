@@ -142,11 +142,6 @@ Using:
 std::stringstream
 ```
 
-to split user input into:
-
-- command
-- arguments
-
 ---
 
 ## Future Improvements
@@ -155,8 +150,6 @@ to split user input into:
 - Hidden file support
 - Delete directories
 - Copy and move operations
-- Interactive navigation using arrow keys
-- Full-screen terminal interface using ncurses
 
 ---
 
