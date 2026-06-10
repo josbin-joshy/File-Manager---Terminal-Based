@@ -5,6 +5,7 @@
 #include<vector>
 #include<algorithm>
 #include<fstream>
+#include<ncurses.h>
 // #include"styles.h"
 // #include"all_commands.h"
 //namespacing this for easier shit
@@ -16,7 +17,15 @@ int main()
 {
     //let this be
     fs::path CurrentPath{fs::current_path()};
-    size_t selected = 0;
+    int selected = 0;
+
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr,TRUE);
+
+
+
     while(true)
     {
 
@@ -33,29 +42,28 @@ int main()
 
         //RENDER
 
-        system("clear");
+        clear();
 
-        std::cout<<"[PATH]:"<<CurrentPath<<'\n'<<std::endl;
+        mvprintw(0,0,"[PATH]:%s\n",CurrentPath.c_str());
 
         for(size_t i = 0; i<entries.size(); ++i)
         {
             if(i == selected)
-                std::cout<<">>";
+                mvprintw(i+2,0,">>");
             else
-                std::cout<<" ";
+                mvprintw(i+2,0," ");
             
             if(entries[i].is_directory())
-                std::cout<<"[DIR]:";
+                printw("[DIR]:");
             else
-                std::cout<<"[FILE]:";
+                printw("[FILE]:");
             
-            std::cout<<entries[i].path().filename().string()<<std::endl;
+            printw("%s\n",entries[i].path().filename().c_str());
         }
 
 
         //INPUT
-        char key;
-        std::cin>>key;
+        char key{getch()};
         
         if(key == 'q')
             break;
@@ -66,11 +74,12 @@ int main()
         }
         else if(key == 'k')
         {
-            if(selected-1 >0)
+            if(selected >0)
             {
                 --selected;
             }
         }
+        refresh();
     }
     return 0;
 
