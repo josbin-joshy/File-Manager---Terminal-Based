@@ -7,14 +7,13 @@
 #include<fstream>
 #include<ncurses.h>
 // #include"styles.h"
-// #include"all_commands.h"
+#include"all_commands.h"
 
 
 enum class Mode
 {
     NORMAL,
     INPUT,
-    CONFIRM,
 };
 
 
@@ -61,29 +60,28 @@ int main()
         for(auto& entry: fs::directory_iterator(CurrentPath)) 
             entries.push_back(entry);
 
-            if(entries.empty()) 
-                selected = 0;
-            if(selected >= entries.size() && !entries.empty()) 
-                selected = entries.size() - 1;
-
-        if(!entries.empty())
+        if(entries.empty()) 
+        {
+            selected = 0;
+            offset = 0;
+        }
+        else
         {
             if(selected >= entries.size())
                 selected = entries.size()-1;
             if(offset > selected)
                 offset = selected;
         }
-        else
-        {
-            selected = 0;
-            offset = 0;
-        }
+        if(selected >= entries.size() && !entries.empty()) 
+            selected = entries.size() - 1;
+        
+        
 
         //RENDER-THINGS(not real render)
 
         clear();
         /*---------------------------HEADER--------------------------------*/
-        mvprintw(0,0,"[PATH]:%s",CurrentPath.c_str());
+        mvprintw(0,0,"\t\t[PATH]:%s",CurrentPath.c_str());
 
         /*-------------------------FILE LIST----------------------------------*/
         int visible_height{LINES - 2};
@@ -94,11 +92,29 @@ int main()
 
             if(i == selected)
                 attron(A_REVERSE);
-            
+
+            std::string name{entries[i].path().filename().string()};
+            if(mode == Mode::INPUT && action == Action::RENAME && i == selected)
+            {
+                name = inputbuffer;
+            }
             if(entries[i].is_directory())
                 mvprintw(row,0,"[DIR]:%s",entries[i].path().filename().c_str());
             else
                 mvprintw(row,0,"[FILE]:%s",entries[i].path().filename().c_str());
+            
+            
+            if(mode == Mode::INPUT && action == Action::RENAME && i == selected)
+            {
+                move(row, (entries[i].is_directory()?7:8)+inputbuffer.size());
+                curs_set(1);
+            }
+            else
+            {
+                curs_set(0);
+            }
+
+            
 
             if(i == selected)
                 attroff(A_REVERSE);
@@ -107,11 +123,9 @@ int main()
 
         /*----------------------INPUT--------------------*/
         int key{getch()};
-        //DEBUG
-        mvprintw(0,0,"key = %d ", key);
 
 
-        //--------------------LOGIC SHIT -----------------------------------
+        //--------------------NAVIGATION ACTUALLY(maybe logic) -----------------------------------
         if(mode == Mode::NORMAL)
         {
             if(key == 'q')
@@ -130,14 +144,14 @@ int main()
                 if(selected < offset)
                     --offset;
             }
-            else if( key == 'l'|| key == '\n')
+            else if(( key == 'l'|| key == '\n') && !entries.empty())
             {
                 if(entries[selected].is_directory())
                 {
                     CurrentPath = entries[selected].path();
                 }
             }
-            else if(key =='h' || key == KEY_BACKSPACE)
+            else if(key =='h' || key == KEY_BACKSPACE || key == 127 || key == 8)
             {
                 if(CurrentPath.has_parent_path())
                 {
@@ -151,6 +165,20 @@ int main()
             {
                 mode = Mode::INPUT;
                 action = Action::MKDIR;
+                inputbuffer.clear();
+            }
+            
+            if(key == 't')
+            {
+                mode = Mode::INPUT;
+                action = Action::TOUCH;
+                inputbuffer.clear();
+            }
+
+            if(key == 'r' && !entries.empty())
+            {
+                mode = Mode::INPUT;
+                action = Action::RENAME;
                 inputbuffer.clear();
             }
         }
@@ -176,6 +204,17 @@ int main()
                 {
                     touch(CurrentPath, inputbuffer);
                 }
+                else if(action == Action::RENAME)
+                {
+                    if(!entries.empty())
+                        renamefile((entries[selected].path()), (CurrentPath / inputbuffer));
+                }
+                inputbuffer.clear();
+                mode = Mode::NORMAL;
+                action = Action::NONE;
+            }
+            else if(key == 27)  //ESC i dont know if there is a KEY_ESC variant
+            {
                 inputbuffer.clear();
                 mode = Mode::NORMAL;
                 action = Action::NONE;
@@ -183,9 +222,9 @@ int main()
         }
 
         if(mode == Mode::INPUT && action == Action::MKDIR)
-            mvprintw(LINES - 1, 0, "New Folder: %s", inputbuffer.c_str());
+            mvprintw(LINES , 0, "New Folder: %s", inputbuffer.c_str());
         if(mode ==Mode::INPUT && action == Action::TOUCH)
-            mvprintw(LINES - 1, 0, "New File: %s", inputbuffer.c_str());
+            mvprintw(LINES , 0, "New File: %s", inputbuffer.c_str());
 
         //FINALE REFRESHING  :)
         refresh();
