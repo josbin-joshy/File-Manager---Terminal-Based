@@ -84,7 +84,7 @@ int main()
         mvprintw(0,0,"\t\t[PATH]:%s",CurrentPath.c_str());
 
         /*-------------------------FILE LIST----------------------------------*/
-        int visible_height{LINES - 2};
+        int visible_height{LINES - 1};
 
         for(int i = offset; i<(int)entries.size() && i< (offset + visible_height); ++i)
         {
@@ -94,27 +94,33 @@ int main()
                 attron(A_REVERSE);
 
             std::string name{entries[i].path().filename().string()};
+
+            #if 1
             if(mode == Mode::INPUT && action == Action::RENAME && i == selected)
             {
                 name = inputbuffer;
-            }
-            if(entries[i].is_directory())
-                mvprintw(row,0,"[DIR]:%s",entries[i].path().filename().c_str());
-            else
-                mvprintw(row,0,"[FILE]:%s",entries[i].path().filename().c_str());
-            
-            
-            if(mode == Mode::INPUT && action == Action::RENAME && i == selected)
-            {
                 move(row, (entries[i].is_directory()?7:8)+inputbuffer.size());
                 curs_set(1);
             }
+            else if(mode == Mode::INPUT && action == Action::MKDIR)
+            {
+                mvprintw(LINES - 1 , 0, "[DIR]: %s", inputbuffer.c_str());
+            }
+
+            else if(mode ==Mode::INPUT && action == Action::TOUCH)
+            {
+                mvprintw(LINES - 1 , 0, "[FILE]: %s", inputbuffer.c_str());
+            }
+            #endif
             else
             {
                 curs_set(0);
             }
 
-            
+            if(entries[i].is_directory())
+                mvprintw(row,0,"[DIR]:%s",name.c_str());
+            else
+                mvprintw(row,0,"[FILE]:%s",name.c_str());           
 
             if(i == selected)
                 attroff(A_REVERSE);
@@ -220,11 +226,6 @@ int main()
                 action = Action::NONE;
             }
         }
-
-        if(mode == Mode::INPUT && action == Action::MKDIR)
-            mvprintw(LINES , 0, "New Folder: %s", inputbuffer.c_str());
-        if(mode ==Mode::INPUT && action == Action::TOUCH)
-            mvprintw(LINES , 0, "New File: %s", inputbuffer.c_str());
 
         //FINALE REFRESHING  :)
         refresh();
