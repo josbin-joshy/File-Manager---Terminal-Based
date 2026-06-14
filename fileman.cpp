@@ -6,7 +6,6 @@
 #include<algorithm>
 #include<fstream>
 #include<ncurses.h>
-// #include"styles.h"
 #include"all_commands.h"
 
 
@@ -29,7 +28,7 @@ enum class Action
 
 //namespacing this for easier shit
 namespace fs = std::filesystem;
-//namespace tc = color;
+
 
 
 int main()
