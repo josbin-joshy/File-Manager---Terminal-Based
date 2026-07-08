@@ -144,15 +144,6 @@ std::stringstream
 
 ---
 
-## Future Improvements
-- File size display
-- File permissions display
-- Hidden file support
-- Delete directories
-- Copy and move operations
-
----
-
 ## Building
 
 ### Linux
